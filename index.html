@@ -2616,7 +2616,7 @@ section, .section, .hero3d, main, .footer {
 <script>
 /* 十之一、实践经历图片：点击查看大图（灯箱） */
 (function(){
-  var imgs = document.querySelectorAll("#intern .intern-photo");
+  var imgs = document.querySelectorAll("#intern .intern-photo, .site-project-shot img");
   if(!imgs.length) return;
   var lb = null, lbImg = null;
   function build(){
@@ -2687,7 +2687,7 @@ section, .section, .hero3d, main, .footer {
 .project-demo-cta .demo-arrow{font-size:18px;font-weight:400;line-height:1}
 @media(max-width:620px){.project-demo-cta{min-height:46px;padding:0 22px}}
 .site-project-shot{margin:18px 0 2px;width:100%;overflow:hidden;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(8,10,12,.72);box-shadow:0 18px 42px rgba(0,0,0,.2)}
-.site-project-shot img{display:block;width:100%;height:auto}
+.site-project-shot img{display:block;width:100%;height:auto;cursor:zoom-in}
 </style>
 </body>
 </html>
