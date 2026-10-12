@@ -51,7 +51,7 @@ img{max-width:100%;display:block}
   opacity:.92;
   filter:contrast(1.08);
   transform:translateZ(0);
-  will-change:contents;
+  
 }
 
 /* ---------- 全屏噪点颗粒 ---------- */
@@ -868,7 +868,7 @@ body::before{
   background:transparent !important;
   opacity:1;
   filter:none !important;
-  mix-blend-mode:normal;
+  mix-blend-mode:normal; z-index:4; opacity:.86; mix-blend-mode:soft-light;
 }
 
 /* 左侧导航 · 中文大写序号 / 行楷 */
@@ -2139,8 +2139,7 @@ section, .section, .hero3d, main, .footer {
 <span class="c-ico"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><rect height="16" rx="2" width="20" x="2" y="4"></rect><path d="m22 7-10 6L2 7"></path></svg></span>
 <span class="c-name">EMAIL</span><span class="c-val">wqh87292000@qq.com</span>
 </a>
-</div>
-<a class="github-repo-link reveal d3" href="https://github.com/wqh26710/homepage" target="_blank" rel="noopener noreferrer" aria-label="在新窗口打开我的 GitHub 项目仓库"><span class="github-repo-mark" aria-hidden="true">GH</span><span class="github-repo-copy"><span class="github-repo-title">我的 GitHub 项目仓库</span><span class="github-repo-desc">浏览个人主页与星穹战线项目源文件</span></span><span class="github-repo-arrow" aria-hidden="true">↗</span></a></div></div></section>
+</div></div></div></section>
 <!-- Footer -->
 <footer class="footer">
 <div class="f2">2026 王庆航</div>
@@ -2202,7 +2201,7 @@ section, .section, .hero3d, main, .footer {
      MeshPhysicalMaterial / 透视相机 / 环境反射 / 速度触发波源。
      ============================================================ */
   var water = document.getElementById("water");
-  if(water && water.getContext && !reduceMotion){
+  if(false){
     water.style.background = "#020202";
     water.style.opacity = "1";
     water.style.filter = "none";
@@ -2391,6 +2390,72 @@ section, .section, .hero3d, main, .footer {
   /* ============================================================
      三、首屏 3D 大字：鼠标视差倾斜
      ============================================================ */
+  /* ============================================================
+     二、轻量水波交互：原创 Canvas 光泽涟漪，空闲时停止绘制。
+     ============================================================ */
+  if(water && water.getContext && !reduceMotion){
+    var waterCtx=water.getContext("2d",{alpha:true,desynchronized:true});
+    var waterMobile=window.matchMedia("(max-width:767px)").matches;
+    var waterDpr=1, waterRipples=[], waterRaf=0, waterLastFrame=0, waterLastSpawn=0, waterLastPointer=null;
+    var waterLife=2200;
+    function waterResize(){
+      waterMobile=window.matchMedia("(max-width:767px)").matches;
+      waterDpr=Math.min(window.devicePixelRatio||1,waterMobile?1.25:1.5);
+      water.width=Math.round(innerWidth*waterDpr); water.height=Math.round(innerHeight*waterDpr);
+      waterCtx.setTransform(waterDpr,0,0,waterDpr,0,0);
+      waterLife=waterMobile?2100:2350;
+    }
+    function waterDraw(r,now){
+      var progress=Math.min(1,(now-r.born)/waterLife);
+      var fade=Math.pow(1-progress,1.55)*r.power;
+      var radius=10+progress*Math.min(Math.max(innerWidth*.72,150),waterMobile?320:560);
+      waterCtx.save(); waterCtx.translate(r.x,r.y); waterCtx.scale(1,waterMobile?.46:.40);
+      var haze=waterCtx.createRadialGradient(0,0,0,0,0,radius);
+      haze.addColorStop(0,"rgba(91,145,151,"+(.10*fade)+")");
+      haze.addColorStop(.56,"rgba(122,170,174,"+(.045*fade)+")");
+      haze.addColorStop(1,"rgba(122,170,174,0)");
+      waterCtx.fillStyle=haze; waterCtx.beginPath(); waterCtx.ellipse(0,0,radius,radius,0,0,Math.PI*2); waterCtx.fill();
+      for(var ring=0;ring<3;ring++){
+        var rr=radius*(.62+ring*.18), shine=waterCtx.createLinearGradient(-rr,0,rr,0);
+        shine.addColorStop(0,"rgba(255,255,255,0)");
+        shine.addColorStop(.25,"rgba(255,255,255,"+(.16*fade)+")");
+        shine.addColorStop(.52,"rgba(102,164,171,"+(.25*fade)+")");
+        shine.addColorStop(.76,"rgba(255,255,255,"+(.42*fade)+")");
+        shine.addColorStop(1,"rgba(255,255,255,0)");
+        waterCtx.beginPath(); waterCtx.ellipse(0,0,rr,rr*.96,0,0,Math.PI*2);
+        waterCtx.strokeStyle=shine; waterCtx.lineWidth=ring===1?1.4:.8; waterCtx.stroke();
+        var angle=now*.00016+r.phase+ring*2.1;
+        waterCtx.beginPath(); waterCtx.ellipse(0,0,rr*1.012,rr*.975,0,angle,angle+.48);
+        waterCtx.strokeStyle="rgba(255,255,255,"+(.58*fade)+")"; waterCtx.lineWidth=ring===1?1.8:1.1; waterCtx.stroke();
+      }
+      waterCtx.restore();
+    }
+    function waterRender(now){
+      if(now-waterLastFrame<(waterMobile?32:24)){waterRaf=requestAnimationFrame(waterRender);return;}
+      waterLastFrame=now; waterCtx.clearRect(0,0,innerWidth,innerHeight);
+      waterRipples=waterRipples.filter(function(r){return now-r.born<waterLife;});
+      for(var i=0;i<waterRipples.length;i++) waterDraw(waterRipples[i],now);
+      if(waterRipples.length) waterRaf=requestAnimationFrame(waterRender);
+      else{waterRaf=0;waterCtx.clearRect(0,0,innerWidth,innerHeight);}
+    }
+    function waterSpawn(x,y,power,force){
+      var now=performance.now(); if(!force&&now-waterLastSpawn<(waterMobile?115:70))return;
+      waterLastSpawn=now; waterRipples.push({x:x,y:y,born:now,power:power,phase:Math.random()*Math.PI*2});
+      if(waterRipples.length>(waterMobile?4:7))waterRipples.shift();
+      if(!waterRaf)waterRaf=requestAnimationFrame(waterRender);
+    }
+    function waterMove(e){
+      var dx=waterLastPointer?e.clientX-waterLastPointer.x:999, dy=waterLastPointer?e.clientY-waterLastPointer.y:999;
+      if(waterLastPointer&&dx*dx+dy*dy<(waterMobile?28*28:18*18))return;
+      waterLastPointer={x:e.clientX,y:e.clientY}; waterSpawn(e.clientX,e.clientY,e.pointerType==="touch"?.82:.66,false);
+    }
+    function waterDown(e){waterLastPointer={x:e.clientX,y:e.clientY};waterSpawn(e.clientX,e.clientY,1.15,true);}
+    waterResize(); window.addEventListener("resize",waterResize,{passive:true});
+    window.addEventListener("pointermove",waterMove,{passive:true}); window.addEventListener("pointerdown",waterDown,{passive:true});
+    window.addEventListener("pointerup",function(){waterLastPointer=null;},{passive:true});
+    window.addEventListener("pointercancel",function(){waterLastPointer=null;},{passive:true});
+  }
+
   var hero3 = null;
   var tilt = null;
   if(hero3 && tilt && !reduceMotion){
