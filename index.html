@@ -868,7 +868,7 @@ body::before{
   background:transparent !important;
   opacity:1;
   filter:none !important;
-  mix-blend-mode:normal; z-index:4; opacity:1; mix-blend-mode:multiply;
+  mix-blend-mode:normal; z-index:4; opacity:1; mix-blend-mode:normal;
 }
 
 /* 左侧导航 · 中文大写序号 / 行楷 */
@@ -2409,13 +2409,13 @@ section, .section, .hero3d, main, .footer {
       var progress=Math.min(1,(now-r.born)/waterLife);
       var fade=Math.pow(1-progress,1.55)*r.power;
       var radius=10+progress*Math.min(Math.max(innerWidth*.86,200),waterMobile?440:560);
-      waterCtx.save(); waterCtx.translate(r.x,r.y); waterCtx.scale(1,waterMobile?.68:.56);
+      waterCtx.save(); waterCtx.translate(r.x,r.y); waterCtx.scale(1,waterMobile?.78:.70);
       var haze=waterCtx.createRadialGradient(0,0,0,0,0,radius);
       haze.addColorStop(0,"rgba(91,145,151,"+(.22*fade)+")");
       haze.addColorStop(.56,"rgba(122,170,174,"+(.13*fade)+")");
       haze.addColorStop(1,"rgba(122,170,174,0)");
       waterCtx.fillStyle=haze; waterCtx.beginPath(); waterCtx.ellipse(0,0,radius,radius,0,0,Math.PI*2); waterCtx.fill();
-      for(var ring=0;ring<3;ring++){
+      waterCtx.beginPath(); waterCtx.ellipse(0,0,radius*.98,radius*.96,0,0,Math.PI*2);waterCtx.strokeStyle="rgba(25,103,124,"+(.52*fade)+")";waterCtx.lineWidth=1.6;waterCtx.stroke();for(var ring=0;ring<3;ring++){
         var rr=radius*(.62+ring*.18), shine=waterCtx.createLinearGradient(-rr,0,rr,0);
         shine.addColorStop(0,"rgba(255,255,255,0)");
         shine.addColorStop(.25,"rgba(45,127,146,"+(.50*fade)+")");
