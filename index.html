@@ -868,7 +868,7 @@ body::before{
   background:transparent !important;
   opacity:1;
   filter:none !important;
-  mix-blend-mode:normal; z-index:4; opacity:1; mix-blend-mode:overlay;
+  mix-blend-mode:normal; z-index:4; opacity:1; mix-blend-mode:multiply;
 }
 
 /* 左侧导航 · 中文大写序号 / 行楷 */
@@ -2408,7 +2408,7 @@ section, .section, .hero3d, main, .footer {
     function waterDraw(r,now){
       var progress=Math.min(1,(now-r.born)/waterLife);
       var fade=Math.pow(1-progress,1.55)*r.power;
-      var radius=10+progress*Math.min(Math.max(innerWidth*.72,150),waterMobile?320:560);
+      var radius=10+progress*Math.min(Math.max(innerWidth*.86,200),waterMobile?440:560);
       waterCtx.save(); waterCtx.translate(r.x,r.y); waterCtx.scale(1,waterMobile?.68:.56);
       var haze=waterCtx.createRadialGradient(0,0,0,0,0,radius);
       haze.addColorStop(0,"rgba(91,145,151,"+(.22*fade)+")");
@@ -2419,14 +2419,14 @@ section, .section, .hero3d, main, .footer {
         var rr=radius*(.62+ring*.18), shine=waterCtx.createLinearGradient(-rr,0,rr,0);
         shine.addColorStop(0,"rgba(255,255,255,0)");
         shine.addColorStop(.25,"rgba(45,127,146,"+(.50*fade)+")");
-        shine.addColorStop(.52,"rgba(19,91,113,"+(.62*fade)+")");
+        shine.addColorStop(.52,"rgba(19,91,113,"+(.82*fade)+")");
         shine.addColorStop(.76,"rgba(255,255,255,"+(.72*fade)+")");
         shine.addColorStop(1,"rgba(255,255,255,0)");
         waterCtx.beginPath(); waterCtx.ellipse(0,0,rr,rr*.96,0,0,Math.PI*2);
         waterCtx.strokeStyle=shine; waterCtx.lineWidth=ring===1?2.1:1.25; waterCtx.stroke();
         var angle=now*.00016+r.phase+ring*2.1;
         waterCtx.beginPath(); waterCtx.ellipse(0,0,rr*1.012,rr*.975,0,angle,angle+.48);
-        waterCtx.strokeStyle="rgba(22,105,128,"+(.70*fade)+")"; waterCtx.lineWidth=ring===1?2.5:1.5; waterCtx.stroke();
+        waterCtx.strokeStyle="rgba(22,105,128,"+(.92*fade)+")"; waterCtx.lineWidth=ring===1?3:1.8; waterCtx.stroke();
       }
       waterCtx.restore();
     }
